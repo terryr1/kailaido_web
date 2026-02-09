@@ -1,6 +1,4 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import './App.css'
 import { PlusIcon } from '@heroicons/react/24/solid'
 import TouchableOpacity from './components/TouchableOpacity'
