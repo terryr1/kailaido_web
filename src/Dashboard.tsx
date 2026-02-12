@@ -10,7 +10,7 @@ function Dashboard() {
 
   const dialog = (
     <dialog open={dialogOpen}>
-      <p>sup friends</p>
+      <p>sup bbbgajdhf</p>
       <form method="dialog">
         <button onClick={() => {
           signIn();
