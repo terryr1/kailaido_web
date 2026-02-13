@@ -17,6 +17,11 @@ function Dashboard() {
           setDialogOpen(false)
         }
         }>Sign In</button>
+        <button onClick={() => {
+          echoAsync();
+          setDialogOpen(false)
+        }
+        }>Echo</button>
       </form>
     </dialog>
   );
@@ -45,25 +50,26 @@ function Dashboard() {
       console.log(error);
     });
 
+  const echoAsync = async () => {
+    const user = auth.currentUser;
+    const token = await user?.getIdToken();
+
+    console.log('fetching');
+    console.log(token);
+
+    await fetch("api/echo", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: "test message",
+      })
+    });
+  }
+
   useEffect(() => {
-    const echoAsync = async () => {
-      const user = auth.currentUser;
-      const token = await user?.getIdToken();
-
-      console.log('fetching');
-      console.log(token);
-
-      await fetch("api/echo", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: "test message",
-        })
-      });
-    }
     echoAsync();
   }, [])
 
