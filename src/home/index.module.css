@@ -1,0 +1,10 @@
+.main {
+    position: fixed;
+    /* Fixes it relative to the viewport/screen */
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    /* Pulls it back to the true center */
+    z-index: 50;
+    /* Ensures it sits on top of other elements */
+}

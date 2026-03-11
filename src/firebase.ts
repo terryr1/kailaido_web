@@ -3,7 +3,7 @@ import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyAq3CCkqGsy5zYhMKoFnRq6VWVGLiN-Ygg",
-  authDomain: "kailaido-beta.firebaseapp.com",
+  authDomain: "beta.kailaido.com",
   projectId: "kailaido-beta",
   storageBucket: "kailaido-beta.firebasestorage.app",
   messagingSenderId: "601492531155",

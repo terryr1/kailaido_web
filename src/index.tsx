@@ -1,0 +1,98 @@
+import { StrictMode, useEffect, useState } from 'react'
+import { createRoot } from 'react-dom/client'
+import '@mantine/core/styles.css'
+import './index.css'
+import Home from './home'
+import { MantineProvider } from '@mantine/core'
+import { auth } from './firebase'
+import Login from './login'
+import type { User } from 'firebase/auth'
+import { createBrowserRouter, Outlet, useNavigate } from "react-router";
+import { RouterProvider } from "react-router/dom";
+import Dashboard from './dashboard'
+import { HeaderSimple } from './components/header/HeaderSimple'
+import { NavbarMinimal } from './components/sidebar/Sidebar'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+const queryClient = new QueryClient()
+
+// 1. Define the App component
+function App() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+      console.log(currentUser)
+      setUser(currentUser);
+      setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  if (loading) return null; // Or a loading spinner
+
+  if (!user) {
+    navigate('auth')
+  }
+
+  return (
+    <>
+      <HeaderSimple></HeaderSimple>
+      <div style={styles.layoutStyle}>
+        <NavbarMinimal />
+        <Outlet></Outlet>
+      </div>
+    </>
+  )
+
+}
+
+const styles = {
+  button: {
+    backgroundColor: 'none',
+    width: 100,
+    height: 100
+  },
+  layoutStyle: {
+    display: 'flex',
+    width: '100vw',
+  },
+  contentStyle: {
+    flex: 1,
+    padding: '20px',
+    overflow: 'auto',
+  }
+}
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    Component: App,
+    children: [
+      {
+        index: true,
+        Component: Home,
+      },
+      {
+        path: "dashboard", Component: Dashboard
+      },
+
+    ],
+  },
+  {
+    path: "auth",
+    Component: Login,
+  },
+]);
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <MantineProvider defaultColorScheme="dark">{/* You need this for Mantine components */}
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+      </QueryClientProvider>
+    </MantineProvider>
+  </StrictMode>
+)
