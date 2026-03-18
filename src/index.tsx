@@ -39,11 +39,7 @@ function App() {
 
   return (
     <>
-      <HeaderSimple></HeaderSimple>
-      <div style={styles.layoutStyle}>
-        <NavbarMinimal />
-        <Outlet></Outlet>
-      </div>
+      <Outlet></Outlet>
     </>
   )
 
@@ -76,7 +72,7 @@ const router = createBrowserRouter([
         Component: Home,
       },
       {
-        path: "dashboard", Component: Dashboard
+        path: "dashboard/:projectId", Component: Dashboard
       },
 
     ],
@@ -89,7 +85,7 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <MantineProvider defaultColorScheme="dark">{/* You need this for Mantine components */}
+    <MantineProvider defaultColorScheme="light">{/* You need this for Mantine components */}
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
       </QueryClientProvider>

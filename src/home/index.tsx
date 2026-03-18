@@ -1,47 +1,38 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { PlusIcon } from '@heroicons/react/24/solid'
 import TouchableOpacity from '../components/TouchableOpacity';
 import { auth } from '../firebase';
-import classes from './index.module.css';
-import { HeaderSimple } from '../components/header/HeaderSimple';
-import { NavbarMinimal } from '../components/sidebar/Sidebar';
 import { useNavigate } from 'react-router';
+import { Center, Dialog, Button, Text, TextInput, Group } from '@mantine/core';
+import { HeaderSimple } from '../components/header/HeaderSimple';
 
 function Home() {
     const [prompt, setPrompt] = useState('');
-    const [responseMessage, setResponseMessage] = useState('');
     const navigate = useNavigate();
 
     const [dialogOpen, setDialogOpen] = useState(false)
 
     const dialog = (
-        <dialog open={dialogOpen}>
-            <p>sup bbbgajdhf</p>
-            <form method="dialog">
-                <input
-                    id="msg-input"
-                    type="text"
-                    value={prompt} // 3. Bind the value to the state
-                    onChange={(event) => setPrompt(event.target.value)} // 4. Update the state as the user types
-                    placeholder="Type here..."
-                />
-                <button onClick={async () => {
-                    await echoAsync(prompt);
-                    console.log('navigating to dashboard')
-                    navigate("/dashboard");
-                    setDialogOpen(false);
-                    setPrompt("");
+        <Dialog opened={dialogOpen} position={{ top: "40%", left: "40%" }}>
+            <Text size="sm" mb="xs" fw={500}>
+                Describe your project:
+            </Text>
+            <Group align="flex-end">
+                <TextInput placeholder="Type here..." style={{ flex: 1 }}
+                    onChange={(event) => setPrompt(event.target.value)} />
+                <Button onClick={async () => {
+                    await createProject(prompt);
                 }
-                }>send</button>
-                <button onClick={() => {
+                }>send</Button>
+                <Button onClick={() => {
                     setDialogOpen(false)
                 }
-                }>Cancel</button>
-            </form>
-        </dialog>
+                }>Cancel</Button>
+            </Group>
+        </Dialog>
     );
 
-    const echoAsync = async (message: string) => {
+    const createProject = async (message: string) => {
         const user = auth.currentUser;
         const token = await user?.getIdToken();
 
@@ -49,43 +40,40 @@ function Home() {
         console.log(token);
 
         try {
-            const response = await fetch("api/echo", {
+            const response = await fetch("api/project", {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    message: message,
+                    initialPrompt: message,
                 })
             });
 
             if (response.ok) {
-                setResponseMessage(await response.text());
+                const projectId = await response.text()
+                console.log('navigating to dashboard')
+                setDialogOpen(false);
+                navigate(`/dashboard/${projectId}`);
             } else {
                 console.log(response);
             }
         } catch (error) {
             console.log(error);
         }
-
-
-
     }
 
     return (
         <div style={styles.contentStyle}>
             {dialog}
-            <div style={styles.main}>
+            <HeaderSimple></HeaderSimple>
+            <Center h="calc(100dvh - 46px)">
                 <TouchableOpacity onClick={() => setDialogOpen(true)} aria-label="add" style={styles.button}>
                     <PlusIcon fontSize={24} />
                 </TouchableOpacity>
-            </div>
-            <div>
-                {responseMessage}
-            </div>
+            </Center>
         </div>
-
     )
 }
 
@@ -100,9 +88,7 @@ const styles = {
         width: '100vw',
     },
     contentStyle: {
-        flex: 1,
-        padding: '20px',
-        overflow: 'auto',
+        width: '100%'
     },
     main: {
         position: 'fixed',
