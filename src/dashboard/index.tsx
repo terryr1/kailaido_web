@@ -49,6 +49,13 @@ function Dashboard() {
     }
 
     const promptAsync = async () => {
+        console.log('start prompt api call: ' + prompt)
+
+        if (prompt.length == 0) {
+            console.log('empty prompt: ' + prompt)
+            return;
+        }
+
         const user = auth.currentUser;
         const token = await user?.getIdToken();
 
@@ -63,8 +70,7 @@ function Dashboard() {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    projectId: 'test_project_id',
-                    message: prompt,
+                    prompt: prompt,
                 })
             });
 
@@ -139,7 +145,7 @@ function Dashboard() {
                     <Container w="100%" h={65} p={0}>
                         <DashboardInput
                             onChange={event => setPrompt(event.currentTarget.value)}
-                            onClick={() => promptAsync()}>
+                            onSearchClick={() => promptAsync()}>
                         </DashboardInput>
                     </Container>
                 </Box>
