@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { auth } from '../firebase';
 import { NavbarMinimal } from '../components/sidebar/Sidebar';
 import { useNavigate, useParams } from 'react-router';
-import { Tabs, Card, Table, Accordion, Text, Title, Stack, AppShell, TextInput, Box, Container, Paper } from '@mantine/core';
+import { Tabs, Card, Table, Accordion, Text, Title, Stack, AppShell, TextInput, Box, Container, Paper, type TableData } from '@mantine/core';
 import { DashboardInput } from '../components/dashboardinput';
 
 interface ComponentSpec {
@@ -16,6 +16,7 @@ interface ComponentSpec {
 
 function Dashboard() {
     const [dashboardConfig, setDashboardConfig] = useState<ComponentSpec[]>([]);
+    const [tables, setTables] = useState<Record<string, any[]>>({})
     const [prompt, setPrompt] = useState('');
     const { projectId } = useParams<{ projectId: string }>();
 
@@ -25,6 +26,7 @@ function Dashboard() {
 
     useEffect(() => {
         loadUI()
+        getTables();
     }, [])
 
     const loadUI = async () => {
@@ -77,6 +79,34 @@ function Dashboard() {
         setPrompt("")
     }
 
+    const getTables = async () => {
+        const user = auth.currentUser;
+        const token = await user?.getIdToken();
+
+        console.log('fetching');
+        console.log(token);
+
+        try {
+            const response = await fetch(`/api/project/${projectId}/tables`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (response.ok) {
+                const res = await response.json();
+                console.log(res)
+                setTables(res);
+            } else {
+                console.log(response);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
 
     console.log(`rendering the dashboard now`);
     console.log(dashboardConfig)
@@ -92,7 +122,7 @@ function Dashboard() {
                 <NavbarMinimal />
             </AppShell.Navbar>
             <AppShell.Main>
-                <DashboardRenderer specs={dashboardConfig} />
+                <DashboardRenderer specs={dashboardConfig} tables={tables} />
 
                 <Box
                     style={{
@@ -118,18 +148,18 @@ function Dashboard() {
     )
 }
 
-const DashboardRenderer = ({ specs }: { specs: ComponentSpec[] }) => {
+const DashboardRenderer = ({ specs, tables }: { specs: ComponentSpec[], tables: Record<string, any[]> }) => {
     console.log('dashboard renderer called')
     return (
         <Stack gap="md">
             {specs.map((spec, index) => (
-                <RenderComponent key={index} spec={spec} />
+                <RenderComponent key={index} spec={spec} tables={tables} />
             ))}
         </Stack>
     );
 };
 
-const RenderComponent = ({ spec }: { spec: ComponentSpec }) => {
+const RenderComponent = ({ spec, tables }: { spec: ComponentSpec, tables: Record<string, any[]> }) => {
     switch (spec.componentType) {
         case 'TABS':
             return (
@@ -147,10 +177,23 @@ const RenderComponent = ({ spec }: { spec: ComponentSpec }) => {
                     {spec.tabs?.map((tab) => (
                         <Tabs.Panel key={tab.title} value={tab.title} pt="xs">
                             {/* Recursive call to render children inside the tab */}
-                            <DashboardRenderer specs={tab.children} />
+                            <DashboardRenderer specs={tab.children} tables={tables} />
                         </Tabs.Panel>
                     ))}
                 </Tabs>
+            );
+        case 'ACCORDION':
+            return (
+                <Accordion variant='contained' defaultValue={spec.tabs?.[0]?.title}>
+                    {spec.tabs?.map((item, index) => (
+                        <Accordion.Item key={index} value={item.title}>
+                            <Accordion.Control >{item.title}</Accordion.Control>
+                            <Accordion.Panel>
+                                <DashboardRenderer specs={item.children} tables={tables} />
+                            </Accordion.Panel>
+                        </Accordion.Item>
+                    ))}
+                </Accordion>
             );
 
         case 'CARD':
@@ -167,9 +210,21 @@ const RenderComponent = ({ spec }: { spec: ComponentSpec }) => {
                 </Card>
             );
         case 'TABLE':
-            return (
-                <Text size="sm" c="dimmed">Table: {spec.tableId}</Text>
+            const rows = tables[spec.tableId || ""] || [];
+
+            // 2. Derive headers only if data exists
+            const head = rows.length > 0
+                ? Object.keys(rows[0])
+                : [];
+
+            // 3. Map values, ensuring we handle potential null/undefined values in cells
+            const body = rows.map(obj =>
+                Object.values(obj).map(val => (val === null || val === undefined ? '' : String(val)))
             );
+
+            const tableData: TableData = { head, body };
+
+            return <Table data={tableData} withTableBorder />;
         default:
             return <></>;
     }
