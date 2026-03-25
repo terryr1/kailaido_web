@@ -25,7 +25,7 @@ function Home() {
     const dialog = (
         <Dialog opened={dialogOpen} position={{ top: "40%", left: "40%" }}>
             <Text size="sm" mb="xs" fw={500}>
-                Describe your project:
+                Start a new conversation:
             </Text>
             <Group align="flex-end">
                 <TextInput placeholder="Type here..." style={{ flex: 1 }}

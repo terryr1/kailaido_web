@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react'
 import { auth } from '../firebase';
 import { NavbarMinimal } from '../components/sidebar/Sidebar';
 import { useNavigate, useParams } from 'react-router';
-import { Tabs, Card, Table, Accordion, Text, Title, Stack, AppShell, TextInput, Box, Container, Paper, type TableData } from '@mantine/core';
+import { Tabs, Card, Table, Accordion, Text, Title, Stack, AppShell, TextInput, Box, Container, Paper, type TableData, ActionIcon, useMantineTheme, Group } from '@mantine/core';
 import { DashboardInput } from '../components/dashboardinput';
+import { IconArrowRight, IconMessages, IconMessagesOff } from '@tabler/icons-react';
+import { Chat } from '../components/chat';
 
 interface ComponentSpec {
     componentType: 'TABS' | 'CARD' | 'TABLE' | 'ACCORDION';
@@ -15,14 +17,15 @@ interface ComponentSpec {
 }
 
 function Dashboard() {
-    const [dashboardConfig, setDashboardConfig] = useState<ComponentSpec[]>([]);
+    const [dashboardConfig, setDashboardConfig] = useState<ComponentSpec>({ componentType: "TABS", tabs: [] });
     const [tables, setTables] = useState<Record<string, any[]>>({})
     const [prompt, setPrompt] = useState('');
+    const [showChat, setShowChat] = useState(false);
     const { projectId } = useParams<{ projectId: string }>();
+    const theme = useMantineTheme();
+    const [messages, setMessages] = useState([])
 
     // const navigate = useNavigate();
-
-    console.log("rendering dashboard")
 
     useEffect(() => {
         loadUI()
@@ -44,8 +47,11 @@ function Dashboard() {
         });
 
         const jsonRes = await response.json()
+        console.log(jsonRes)
 
-        setDashboardConfig(jsonRes);
+        setDashboardConfig(jsonRes.dashboard);
+        setMessages(jsonRes.messages.map((message: { CreatedBy: any; Content: any; }) =>
+            ({ userName: message.CreatedBy, commentText: message.Content })));
     }
 
     const promptAsync = async () => {
@@ -76,13 +82,15 @@ function Dashboard() {
 
             if (response.ok) {
                 console.log(await response.text());
+                setPrompt("")
+                loadUI()
+                getTables();
             } else {
                 console.log(response);
             }
         } catch (error) {
             console.log(error);
         }
-        setPrompt("")
     }
 
     const getTables = async () => {
@@ -103,7 +111,6 @@ function Dashboard() {
 
             if (response.ok) {
                 const res = await response.json();
-                console.log(res)
                 setTables(res);
             } else {
                 console.log(response);
@@ -112,29 +119,30 @@ function Dashboard() {
             console.log(error);
         }
     }
-
-
-    console.log(`rendering the dashboard now`);
     console.log(dashboardConfig)
     return (
         <AppShell
-            navbar={{
-                width: 80, // Match the width of your NavbarMinimal
-                breakpoint: 'sm',
-            }}
+            // navbar={{
+            //     width: 80, // Match the width of your NavbarMinimal
+            //     breakpoint: 'sm',
+            // }}
             padding="md"
         >
-            <AppShell.Navbar>
+            {/* <AppShell.Navbar>
                 <NavbarMinimal />
-            </AppShell.Navbar>
+            </AppShell.Navbar> */}
             <AppShell.Main>
-                <DashboardRenderer specs={dashboardConfig} tables={tables} />
+                <div style={{ position: 'relative', display: 'block' }}>
+                    {/* The actual component you want to mask */}
+                    {showChat ? <Chat messages={messages} /> :
+                        <DashboardRenderer specs={[dashboardConfig]} tables={tables} />}
+                </div>
 
                 <Box
                     style={{
                         position: 'fixed',
                         bottom: 0,
-                        left: 80, // Navbar width
+                        left: 0, //80, // Navbar width
                         right: 0,
                         padding: '20px',
                         display: 'flex',
@@ -143,10 +151,25 @@ function Dashboard() {
                     }}
                 >
                     <Container w="100%" h={65} p={0}>
-                        <DashboardInput
-                            onChange={event => setPrompt(event.currentTarget.value)}
-                            onSearchClick={() => promptAsync()}>
-                        </DashboardInput>
+                        <Group wrap="nowrap" gap="xs" align="center" style={{ height: '100%' }}>
+                            <DashboardInput
+                                style={{ flex: 1 }} // This makes the input take up all remaining space
+                                onChange={event => setPrompt(event.currentTarget.value)}
+                                onSearchClick={() => promptAsync()}
+                            />
+
+                            <ActionIcon
+                                size={32}
+                                radius="xl"
+                                color={theme.primaryColor}
+                                variant="filled"
+                                aria-label="Search"
+                                onClick={() => setShowChat(!showChat)}
+                            >
+                                {showChat ? <IconMessagesOff size={18} stroke={1.5} /> :
+                                    <IconMessages size={18} stroke={1.5} />}
+                            </ActionIcon>
+                        </Group>
                     </Container>
                 </Box>
             </AppShell.Main>
@@ -168,6 +191,9 @@ const DashboardRenderer = ({ specs, tables }: { specs: ComponentSpec[], tables: 
 const RenderComponent = ({ spec, tables }: { spec: ComponentSpec, tables: Record<string, any[]> }) => {
     switch (spec.componentType) {
         case 'TABS':
+            if (!spec.tabs || spec.tabs.length === 0) {
+                return null; // Or a loader/skeleton
+            }
             return (
                 <Tabs variant='outline' defaultValue={spec.tabs?.[0]?.title}>
                     <Tabs.List>
@@ -189,6 +215,9 @@ const RenderComponent = ({ spec, tables }: { spec: ComponentSpec, tables: Record
                 </Tabs>
             );
         case 'ACCORDION':
+            if (!spec.tabs || spec.tabs.length === 0) {
+                return null; // Or a loader/skeleton
+            }
             return (
                 <Accordion variant='contained' defaultValue={spec.tabs?.[0]?.title}>
                     {spec.tabs?.map((item, index) => (
@@ -216,6 +245,7 @@ const RenderComponent = ({ spec, tables }: { spec: ComponentSpec, tables: Record
                 </Card>
             );
         case 'TABLE':
+            console.log(`getting table for ${spec.tableId}`)
             const rows = tables[spec.tableId || ""] || [];
 
             // 2. Derive headers only if data exists
@@ -230,7 +260,7 @@ const RenderComponent = ({ spec, tables }: { spec: ComponentSpec, tables: Record
 
             const tableData: TableData = { head, body };
 
-            return <Table data={tableData} withTableBorder />;
+            return <Table data={tableData} withTableBorder highlightOnHover withColumnBorders />;
         default:
             return <></>;
     }
