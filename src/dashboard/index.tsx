@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
 import { auth } from '../firebase';
-import { NavbarMinimal } from '../components/sidebar/Sidebar';
-import { useNavigate, useParams } from 'react-router';
+import { useParams } from 'react-router';
 import { Tabs, Card, Table, Accordion, Text, Title, Stack, AppShell, TextInput, Box, Container, Paper, type TableData, ActionIcon, useMantineTheme, Group } from '@mantine/core';
 import { DashboardInput } from '../components/dashboardinput';
-import { IconArrowRight, IconMessages, IconMessagesOff } from '@tabler/icons-react';
+import { IconMessages, IconMessagesOff } from '@tabler/icons-react';
 import { Chat } from '../components/chat';
 
 interface ComponentSpec {
@@ -266,20 +265,4 @@ const RenderComponent = ({ spec, tables }: { spec: ComponentSpec, tables: Record
     }
 };
 
-const styles = {
-    button: {
-        backgroundColor: 'none',
-        width: 100,
-        height: 100
-    },
-    layoutStyle: {
-        display: 'flex',
-        width: '100vw',
-    },
-    contentStyle: {
-        flex: 1,
-        padding: '20px',
-        overflow: 'auto',
-    }
-}
 export default Dashboard

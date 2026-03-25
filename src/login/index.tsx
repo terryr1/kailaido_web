@@ -1,10 +1,7 @@
-import { useState } from 'react'
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from '../firebase';
 
 function Login() {
-  const [prompt, setPrompt] = useState('');
-  const [responseMessage, setResponseMessage] = useState('');
 
   const provider = new GoogleAuthProvider();
 
@@ -35,7 +32,7 @@ function Login() {
       <h1>Kailaido</h1>
 
       <div className="card">
-        <p>sup bbbgajdhf</p>
+        <p>Welcome to Kailaido !</p>
         <form method="dialog">
           <button onClick={() => {
             signIn();
@@ -43,18 +40,8 @@ function Login() {
           }>Sign In</button>
         </form>
       </div>
-      <div>
-        {responseMessage}
-      </div>
     </>
   )
 }
 
-const styles = {
-  button: {
-    backgroundColor: 'none',
-    width: 100,
-    height: 100
-  }
-}
 export default Login

@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Burger, Container, Group } from '@mantine/core';
+import { Burger, Container } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { ChatBubbleBottomCenterTextIcon } from '@heroicons/react/24/solid';
 import classes from './HeaderSimple.module.css';
 
 const links = [
@@ -13,22 +12,6 @@ const links = [
 
 export function HeaderSimple() {
   const [opened, { toggle }] = useDisclosure(false);
-  const [active, setActive] = useState(links[0].link);
-
-  const items = links.map((link) => (
-    <a
-      key={link.label}
-      href={link.link}
-      className={classes.link}
-      data-active={active === link.link || undefined}
-      onClick={(event) => {
-        event.preventDefault();
-        setActive(link.link);
-      }}
-    >
-      {link.label}
-    </a>
-  ));
 
   return (
     <header style={styles.header}>

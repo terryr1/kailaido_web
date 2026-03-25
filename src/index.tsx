@@ -10,8 +10,6 @@ import type { User } from 'firebase/auth'
 import { createBrowserRouter, Outlet, useNavigate } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import Dashboard from './dashboard'
-import { HeaderSimple } from './components/header/HeaderSimple'
-import { NavbarMinimal } from './components/sidebar/Sidebar'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 const queryClient = new QueryClient()
@@ -43,23 +41,6 @@ function App() {
     </>
   )
 
-}
-
-const styles = {
-  button: {
-    backgroundColor: 'none',
-    width: 100,
-    height: 100
-  },
-  layoutStyle: {
-    display: 'flex',
-    width: '100vw',
-  },
-  contentStyle: {
-    flex: 1,
-    padding: '20px',
-    overflow: 'auto',
-  }
 }
 
 const router = createBrowserRouter([

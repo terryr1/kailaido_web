@@ -10,9 +10,8 @@ import {
   IconSwitchHorizontal,
   IconUser,
 } from '@tabler/icons-react';
-import { Center, Stack, Tooltip, UnstyledButton } from '@mantine/core';
+import { Stack, Tooltip, UnstyledButton } from '@mantine/core';
 import classes from './NavbarMinimal.module.css';
-import { ChatBubbleBottomCenterTextIcon } from '@heroicons/react/24/solid';
 
 interface NavbarLinkProps {
   icon: typeof IconHome2;
