@@ -46,9 +46,6 @@ function Home() {
         const user = auth.currentUser;
         const token = await user?.getIdToken();
 
-        console.log('fetching');
-        console.log(token);
-
         try {
             const response = await fetch("api/projects", {
                 method: "GET",
@@ -60,7 +57,6 @@ function Home() {
 
             if (response.ok) {
                 const projectsResponse = await response.json()
-                console.log(projectsResponse)
                 setProjects(projectsResponse);
             } else {
                 console.log(response);
@@ -73,9 +69,6 @@ function Home() {
     const createProject = async (message: string) => {
         const user = auth.currentUser;
         const token = await user?.getIdToken();
-
-        console.log('fetching');
-        console.log(token);
 
         try {
             const response = await fetch("api/project", {
@@ -91,7 +84,6 @@ function Home() {
 
             if (response.ok) {
                 const projectId = await response.text()
-                console.log('navigating to dashboard')
                 setDialogOpen(false);
                 navigate(`/dashboard/${projectId}`);
             } else {

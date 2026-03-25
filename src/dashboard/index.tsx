@@ -35,8 +35,6 @@ function Dashboard() {
         const user = auth.currentUser;
         const token = await user?.getIdToken();
 
-        console.log(`make api call ${projectId}`)
-
         const response = await fetch(`/api/project/${projectId}/config`, {
             method: "GET",
             headers: {
@@ -46,7 +44,6 @@ function Dashboard() {
         });
 
         const jsonRes = await response.json()
-        console.log(jsonRes)
 
         setDashboardConfig(jsonRes.dashboard);
         setMessages(jsonRes.messages.map((message: { CreatedBy: any; Content: any; }) =>
@@ -54,8 +51,6 @@ function Dashboard() {
     }
 
     const promptAsync = async () => {
-        console.log('start prompt api call: ' + prompt)
-
         if (prompt.length == 0) {
             console.log('empty prompt: ' + prompt)
             return;
@@ -63,9 +58,6 @@ function Dashboard() {
 
         const user = auth.currentUser;
         const token = await user?.getIdToken();
-
-        console.log('fetching');
-        console.log(token);
 
         try {
             const response = await fetch(`/api/project/${projectId}/prompt`, {
@@ -80,7 +72,6 @@ function Dashboard() {
             });
 
             if (response.ok) {
-                console.log(await response.text());
                 setPrompt("")
                 loadUI()
                 getTables();
@@ -95,9 +86,6 @@ function Dashboard() {
     const getTables = async () => {
         const user = auth.currentUser;
         const token = await user?.getIdToken();
-
-        console.log('fetching');
-        console.log(token);
 
         try {
             const response = await fetch(`/api/project/${projectId}/tables`, {
@@ -118,7 +106,7 @@ function Dashboard() {
             console.log(error);
         }
     }
-    console.log(dashboardConfig)
+
     return (
         <AppShell
             // navbar={{
@@ -177,7 +165,6 @@ function Dashboard() {
 }
 
 const DashboardRenderer = ({ specs, tables }: { specs: ComponentSpec[], tables: Record<string, any[]> }) => {
-    console.log('dashboard renderer called')
     return (
         <Stack gap="md">
             {specs.map((spec, index) => (
@@ -244,7 +231,6 @@ const RenderComponent = ({ spec, tables }: { spec: ComponentSpec, tables: Record
                 </Card>
             );
         case 'TABLE':
-            console.log(`getting table for ${spec.tableId}`)
             const rows = tables[spec.tableId || ""] || [];
 
             // 2. Derive headers only if data exists

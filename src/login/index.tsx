@@ -1,5 +1,7 @@
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from '../firebase';
+import { HeaderSimple } from "../components/header/HeaderSimple";
+import { Button, Center } from "@mantine/core";
 
 function Login() {
 
@@ -28,20 +30,39 @@ function Login() {
     });
 
   return (
-    <>
-      <h1>Kailaido</h1>
-
-      <div className="card">
-        <p>Welcome to Kailaido !</p>
-        <form method="dialog">
-          <button onClick={() => {
-            signIn();
-          }
-          }>Sign In</button>
-        </form>
-      </div>
-    </>
+    <div style={styles.contentStyle}>
+      <HeaderSimple></HeaderSimple>
+      <Center h="calc(100dvh - 46px)">
+        <Button variant="default" onClick={() => {
+          signIn();
+        }}>
+          Sign In
+        </Button>
+      </Center>
+    </div >
   )
+}
+
+const styles = {
+  button: {
+    backgroundColor: 'none',
+    width: 100,
+    height: 100
+  },
+  layoutStyle: {
+    display: 'flex',
+    width: '100vw',
+  },
+  contentStyle: {
+    width: '100%'
+  },
+  main: {
+    position: 'fixed',
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    zIndex: 50,
+  } as const //kinda hacky
 }
 
 export default Login

@@ -22,7 +22,6 @@ function App() {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((currentUser) => {
-      console.log(currentUser)
       setUser(currentUser);
       setLoading(false);
     });
@@ -32,7 +31,7 @@ function App() {
   if (loading) return null; // Or a loading spinner
 
   if (!user) {
-    navigate('auth')
+    navigate('/auth')
   }
 
   return (
