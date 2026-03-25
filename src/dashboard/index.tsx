@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { auth } from '../firebase';
 import { useParams } from 'react-router';
-import { Tabs, Card, Table, Accordion, Text, Title, Stack, AppShell, Box, Container, type TableData, ActionIcon, useMantineTheme, Group } from '@mantine/core';
+import { Tabs, Card, Table, Accordion, Text, Title, Stack, AppShell, Box, Container, type TableData, ActionIcon, useMantineTheme, Group, LoadingOverlay } from '@mantine/core';
 import { DashboardInput } from '../components/dashboardinput';
 import { IconMessages, IconMessagesOff } from '@tabler/icons-react';
 import { Chat } from '../components/chat';
@@ -23,6 +23,7 @@ function Dashboard() {
     const { projectId } = useParams<{ projectId: string }>();
     const theme = useMantineTheme();
     const [messages, setMessages] = useState([])
+    const [loading, setLoading] = useState(false);
 
     // const navigate = useNavigate();
 
@@ -55,12 +56,12 @@ function Dashboard() {
             console.log('empty prompt: ' + prompt)
             return;
         }
-
+        setLoading(true);
         const user = auth.currentUser;
         const token = await user?.getIdToken();
 
         try {
-            const response = await fetch(`/api/project/${projectId}/prompt`, {
+            const responsePromise = fetch(`/api/project/${projectId}/prompt`, {
                 method: "POST",
                 headers: {
                     Authorization: `Bearer ${token}`,
@@ -70,14 +71,18 @@ function Dashboard() {
                     prompt: prompt,
                 })
             });
+            setPrompt("")
 
-            if (response.ok) {
-                setPrompt("")
-                loadUI()
-                getTables();
-            } else {
-                console.log(response);
-            }
+            responsePromise.then(response => {
+                setLoading(false);
+                if (response.ok) {
+                    loadUI()
+                    getTables();
+                }
+            }).catch(error => {
+                setLoading(false);
+                console.log(error)
+            })
         } catch (error) {
             console.log(error);
         }
@@ -119,12 +124,19 @@ function Dashboard() {
                 <NavbarMinimal />
             </AppShell.Navbar> */}
             <AppShell.Main>
-                <div style={{ position: 'relative', display: 'block' }}>
-                    {/* The actual component you want to mask */}
-                    {showChat ? <Chat messages={messages} /> :
-                        <DashboardRenderer specs={[dashboardConfig]} tables={tables} />}
-                </div>
+                <Box pos="relative"> {/* Parent must be relative */}
+                    <LoadingOverlay
+                        visible={loading}
+                        zIndex={1000}
+                        overlayProps={{ radius: "sm", blur: 0 }}
+                        loaderProps={{ color: 'blue', size: 'xl', type: 'bars' }}
+                    />
 
+                    <div style={{ position: 'relative', display: 'block' }}>
+                        {showChat ? <Chat messages={messages} /> :
+                            <DashboardRenderer specs={[dashboardConfig]} tables={tables} />}
+                    </div>
+                </Box>
                 <Box
                     style={{
                         position: 'fixed',
@@ -143,6 +155,7 @@ function Dashboard() {
                                 style={{ flex: 1 }} // This makes the input take up all remaining space
                                 onChange={event => setPrompt(event.currentTarget.value)}
                                 onSearchClick={() => promptAsync()}
+                                value={prompt}
                             />
 
                             <ActionIcon

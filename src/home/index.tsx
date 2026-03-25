@@ -3,7 +3,7 @@ import { PlusIcon } from '@heroicons/react/24/solid'
 import TouchableOpacity from '../components/TouchableOpacity';
 import { auth } from '../firebase';
 import { useNavigate } from 'react-router';
-import { Center, Dialog, Button, Text, TextInput, Group } from '@mantine/core';
+import { Center, Dialog, Button, Text, TextInput, Group, Loader } from '@mantine/core';
 import { HeaderSimple } from '../components/header/HeaderSimple';
 
 interface Project {
@@ -14,6 +14,7 @@ interface Project {
 function Home() {
     const [prompt, setPrompt] = useState('');
     const [projects, setProjects] = useState<Project[]>([])
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const [dialogOpen, setDialogOpen] = useState(false)
@@ -31,6 +32,7 @@ function Home() {
                 <TextInput placeholder="Type here..." style={{ flex: 1 }}
                     onChange={(event) => setPrompt(event.target.value)} />
                 <Button onClick={async () => {
+                    setDialogOpen(false)
                     await createProject(prompt);
                 }
                 }>send</Button>
@@ -71,6 +73,7 @@ function Home() {
         const token = await user?.getIdToken();
 
         try {
+            setLoading(true)
             const response = await fetch("api/project", {
                 method: "POST",
                 headers: {
@@ -85,11 +88,13 @@ function Home() {
             if (response.ok) {
                 const projectId = await response.text()
                 setDialogOpen(false);
+                setLoading(false)
                 navigate(`/dashboard/${projectId}`);
             } else {
                 console.log(response);
             }
         } catch (error) {
+            setLoading(false);
             console.log(error);
         }
     }
@@ -97,6 +102,9 @@ function Home() {
     return (
         <div style={styles.contentStyle}>
             {dialog}
+            {loading && <Center h="100vh" w="100vw">
+                <Loader color="blue" size="xl" type="bars" />
+            </Center>}
             <HeaderSimple></HeaderSimple>
             <Center h="calc(100dvh - 46px)">
                 <TouchableOpacity onClick={() => setDialogOpen(true)} aria-label="add" style={styles.button}>
