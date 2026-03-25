@@ -2,9 +2,10 @@ import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from '../firebase';
 import { HeaderSimple } from "../components/header/HeaderSimple";
 import { Button, Center } from "@mantine/core";
+import { useNavigate } from "react-router";
 
 function Login() {
-
+  const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
 
   const signIn = () => signInWithPopup(auth, provider)
@@ -15,7 +16,10 @@ function Login() {
       // The signed-in user info.
       const user = result.user;
 
-      console.log(user);
+      if (user) {
+        navigate('/')
+      }
+
     }).catch((error) => {
       // Handle Errors here.
       // const errorCode = error.code;
