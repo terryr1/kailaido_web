@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { auth } from '../firebase';
 import { useParams } from 'react-router';
-import { Tabs, Card, Table, Accordion, Text, Title, Stack, AppShell, TextInput, Box, Container, Paper, type TableData, ActionIcon, useMantineTheme, Group } from '@mantine/core';
+import { Tabs, Card, Table, Accordion, Text, Title, Stack, AppShell, Box, Container, type TableData, ActionIcon, useMantineTheme, Group } from '@mantine/core';
 import { DashboardInput } from '../components/dashboardinput';
 import { IconMessages, IconMessagesOff } from '@tabler/icons-react';
 import { Chat } from '../components/chat';

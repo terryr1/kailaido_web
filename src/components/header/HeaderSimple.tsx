@@ -1,14 +1,5 @@
-import { useState } from 'react';
 import { Burger, Container } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import classes from './HeaderSimple.module.css';
-
-const links = [
-  { link: '/about', label: 'Test 1' },
-  { link: '/pricing', label: 'Pricing' },
-  { link: '/learn', label: 'Learn' },
-  { link: '/community', label: 'Community' },
-];
 
 export function HeaderSimple() {
   const [opened, { toggle }] = useDisclosure(false);
